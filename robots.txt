@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://khansa-gulshad.github.io/Gdansk_street_level_greenery_map/robots.txt
