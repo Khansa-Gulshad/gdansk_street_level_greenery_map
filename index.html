@@ -181,6 +181,8 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             z-index: 1000;
             min-width: 320px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
@@ -723,6 +725,12 @@
     <!-- Control Panel -->
     <div class="control-panel">
         <h3>Street-Level Analysis</h3>
+        <div class="info-box">
+            <strong>How to use:</strong>
+            • Select an index below<br>
+            • Use street condition filter to explore<br>
+            • Histogram updates dynamically
+        </div>
         <div class="button-group">
             <button class="index-button active" data-index="GVI" onclick="selectIndex('GVI')">
                 <span>Green View Index (GVI)</span>
@@ -861,12 +869,6 @@
             <div class="legend-note">Gray = No data</div>
         </div>
         
-        <div class="info-box">
-            <strong>How to use:</strong>
-            • Select an index above<br>
-            • Use slider to filter streets<br>
-            • Histogram updates dynamically
-        </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
