@@ -778,6 +778,7 @@
         let geojsonData; // streets     
 	let districtsData;  // districts
 	let boundaryData;   // city boundary
+	let districtStats;  // computed after districts load
         const indexStats = {"GVI": {"mean": 0.2233094016090199, "min": 0.0, "max": 0.9927}, "IAI": {"mean": 0.3547145575195255, "min": 0.0, "max": 0.9955}, "OSI": {"mean": 0.08030176757296377, "min": 0.0, "max": 0.6416}};
         
         const colorSchemes = {
@@ -1023,19 +1024,35 @@
         async function loadExternalData() {
 
             // Streets → GitHub Release asset
-            geojsonData = await fetch(
+            const streetsResp = await fetch(
                 "https://github.com/Khansa-Gulshad/Gdansk_street_level_greenery_map/releases/download/data/streets.geojson"
-            ).then(r => r.json());
+            );
+            if (!streetsResp.ok) throw new Error("Failed to load streets: " + streetsResp.status);
+            geojsonData = await streetsResp.json();
 
             // Districts → local repo data folder
-            districtsData = await fetch(
-                "data/districts.geojson"
-            ).then(r => r.json());
+            const districtsResp = await fetch("data/districts.geojson");
+            if (!districtsResp.ok) throw new Error("Failed to load districts: " + districtsResp.status);
+            districtsData = await districtsResp.json();
 
             // Boundary → local repo data folder
-            boundaryData = await fetch(
-                "data/boundary.geojson"
-            ).then(r => r.json());
+            const boundaryResp = await fetch("data/boundary.geojson");
+            if (!boundaryResp.ok) throw new Error("Failed to load boundary: " + boundaryResp.status);
+            boundaryData = await boundaryResp.json();
+
+            // Compute district-level stats from loaded data
+            const mapping = { GVI: 'avg_gvi_w', IAI: 'avg_iai_w', OSI: 'avg_osi_w' };
+            districtStats = {};
+            for (const [index, key] of Object.entries(mapping)) {
+                const values = districtsData.features
+                    .map(f => f.properties[key])
+                    .filter(v => v !== null && v !== undefined);
+                districtStats[index] = {
+                    min: Math.min(...values),
+                    max: Math.max(...values),
+                    mean: values.reduce((a, b) => a + b, 0) / values.length
+                };
+            }
         }
         async function initMap() {
             map = L.map('map', {
@@ -1051,10 +1068,14 @@
                 zoomOffset: -1
             }).addTo(map);
             
-            // 🔹 LOAD DATA (this is the key addition)
-            await loadExternalData();
+            try {
+                await loadExternalData();
+            } catch (e) {
+                document.getElementById('loading').textContent = 'Error loading data: ' + e.message;
+                console.error(e);
+                return;
+            }
 
-           // Existing logic — unchanged
            loadData();
            map.on('zoomend', updateScale);
            updateScale();
