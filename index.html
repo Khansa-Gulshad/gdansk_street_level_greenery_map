@@ -1025,7 +1025,7 @@
 
             // Streets → GitHub Release asset
             const streetsResp = await fetch(
-                "https://github.com/Khansa-Gulshad/Gdansk_street_level_greenery_map/releases/download/data/streets.geojson"
+                "https://cdn.jsdelivr.net/gh/Khansa-Gulshad/Gdansk_street_level_greenery_map@data/streets.geojson"
             );
             if (!streetsResp.ok) throw new Error("Failed to load streets: " + streetsResp.status);
             geojsonData = await streetsResp.json();
