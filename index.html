@@ -384,6 +384,56 @@
             color: #707070;
             font-style: italic;
         }
+
+        .legend-interp {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 10px;
+            color: #808080;
+            font-style: italic;
+        }
+
+        .legend-interp span:last-child {
+            text-align: right;
+        }
+
+        .legend-interp span:nth-child(2) {
+            text-align: center;
+        }
+
+        .legend-district-note {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(100, 181, 246, 0.08);
+            border: 1px solid rgba(100, 181, 246, 0.15);
+            border-radius: 6px;
+            font-size: 11px;
+            color: #909090;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .explore-btn {
+            display: block;
+            width: 100%;
+            padding: 14px 24px;
+            margin-top: 10px;
+            background: rgba(100, 181, 246, 0.9);
+            border: none;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .explore-btn:hover {
+            background: rgba(100, 181, 246, 1);
+            box-shadow: 0 4px 16px rgba(100, 181, 246, 0.4);
+        }
         
         .info-box {
             margin-top: 20px;
@@ -783,6 +833,21 @@
                     assumptions (5 m, 10 m, and 15 m between trees).
                 </p>
             </div>
+
+            <div class="info-section">
+                <h3>District vs. Street Scale</h3>
+                <p>
+                    At the district scale, colors represent the average street-level conditions
+                    within each district. Values are calculated as length-weighted averages,
+                    meaning longer street segments contribute more to the district value than
+                    shorter ones.
+                </p>
+                <p>
+                    Zoom in to see individual street segments and their specific index values.
+                </p>
+            </div>
+
+            <button class="explore-btn" onclick="closeInfo()">Explore the map</button>
         </div>
     </div>
     
@@ -962,7 +1027,15 @@
                 <span id="legend-min">Low</span>
                 <span id="legend-max">High</span>
             </div>
+            <div class="legend-interp" id="legend-interp">
+                <span>Low visible greenery</span>
+                <span>Moderate street greenery</span>
+                <span>High visible greenery</span>
+            </div>
             <div class="legend-note">Gray = No data</div>
+            <div class="legend-district-note" id="legend-district-note">
+                District colors show length-weighted averages of street-level values. Longer streets influence the district color more.
+            </div>
         </div>
         
     </div>
@@ -991,6 +1064,13 @@
 	let districtStats;  // computed after districts load
         const indexStats = {"GVI": {"mean": 0.2233094016090199, "min": 0.0, "max": 0.9927}, "IAI": {"mean": 0.3547145575195255, "min": 0.0, "max": 0.9955}, "OSI": {"mean": 0.08030176757296377, "min": 0.0, "max": 0.6416}};
         
+        const legendInterpText = {
+            GVI: ['Low visible greenery', 'Moderate street greenery', 'High visible greenery'],
+            IAI: ['Permeable / less built-up', 'Mixed surfaces', 'Highly impervious'],
+            OSI: ['Little open space', 'Some open terrain', 'Large visible open space'],
+            tree: ['Limited planting potential', 'Moderate planting opportunity', 'High planting potential']
+        };
+
         const colorSchemes = {
             GVI: {
                 name: 'Green View Index',
@@ -1266,12 +1346,18 @@
         function updateLegendForScale() {
             const scheme = colorSchemes[currentIndex];
             const stats = currentScale === 'district' ? districtStats[currentIndex] : indexStats[currentIndex];
-            
+
             document.getElementById('legend-title').textContent = scheme.name;
-            document.getElementById('legend-gradient').style.background = 
+            document.getElementById('legend-gradient').style.background =
                 'linear-gradient(to right, ' + scheme.colors.join(', ') + ')';
             document.getElementById('legend-min').textContent = stats.min.toFixed(3);
             document.getElementById('legend-max').textContent = stats.max.toFixed(3);
+
+            var interp = legendInterpText[currentIndex];
+            var interpEl = document.getElementById('legend-interp');
+            interpEl.innerHTML = '<span>' + interp[0] + '</span><span>' + interp[1] + '</span><span>' + interp[2] + '</span>';
+
+            document.getElementById('legend-district-note').style.display = currentScale === 'district' ? 'block' : 'none';
         }
         
         function updateScale() {
@@ -1567,6 +1653,9 @@
                     'linear-gradient(to right, #fee08b, #d9ef8b, #a6d96a, #66bd63, #1a9850, #006837)';
                 document.getElementById('legend-min').textContent = '0';
                 document.getElementById('legend-max').textContent = String(treeMax);
+                var tInterp = legendInterpText.tree;
+                document.getElementById('legend-interp').innerHTML = '<span>' + tInterp[0] + '</span><span>' + tInterp[1] + '</span><span>' + tInterp[2] + '</span>';
+                document.getElementById('legend-district-note').style.display = 'none';
 
                 // Histogram for tree data
                 const canvas = document.getElementById('histogram');
