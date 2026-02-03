@@ -643,6 +643,81 @@
             accent-color: #66bd63;
         }
 
+        /* Graph Toggle Button */
+        .graph-toggle-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            z-index: 1000;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .graph-toggle-btn:hover {
+            background: rgba(40, 40, 40, 0.95);
+            border-color: rgba(100, 181, 246, 0.3);
+        }
+
+        .graph-toggle-btn.hidden {
+            display: none;
+        }
+
+        /* Histogram Close Button */
+        .hist-close-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .hist-close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .histogram-panel.hidden {
+            display: none;
+        }
+
+        /* Zoom Banner */
+        .zoom-banner {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e0e0e0;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 999;
+            pointer-events: none;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .zoom-banner.hidden {
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .control-panel {
                 min-width: 280px;
@@ -711,10 +786,17 @@
         </div>
     </div>
     
+    <!-- Graph Toggle Button -->
+    <button id="graphToggleBtn" class="graph-toggle-btn" onclick="openHistogram()">Distribution</button>
+
+    <!-- Zoom Banner -->
+    <div id="zoomBanner" class="zoom-banner hidden">Zoom in to show the street network</div>
+
     <!-- Histogram Panel -->
-    <div id="histogramPanel" class="histogram-panel">
+    <div id="histogramPanel" class="histogram-panel hidden">
         <div class="histogram-header">
             <h4 id="histTitle">Distribution</h4>
+            <button class="hist-close-btn" onclick="closeHistogram()">&#215;</button>
         </div>
         <div class="histogram-stats">
             <div class="stat-item">
@@ -927,9 +1009,19 @@
         function showInfo() {
             document.getElementById('infoModal').classList.remove('hidden');
         }
-        
+
         function closeInfo() {
             document.getElementById('infoModal').classList.add('hidden');
+        }
+
+        function openHistogram() {
+            document.getElementById('histogramPanel').classList.remove('hidden');
+            document.getElementById('graphToggleBtn').classList.add('hidden');
+        }
+
+        function closeHistogram() {
+            document.getElementById('histogramPanel').classList.add('hidden');
+            document.getElementById('graphToggleBtn').classList.remove('hidden');
         }
         
         function selectIndex(index) {
@@ -1190,6 +1282,7 @@
                     }
                     document.querySelectorAll('.index-filter').forEach(f => f.style.display = 'none');
                     document.getElementById('streetConditionFilter').style.display = 'none';
+                    document.getElementById('zoomBanner').classList.remove('hidden');
                     renderDistricts();
                 } else {
                     if (districtsLayer && map.hasLayer(districtsLayer)) {
@@ -1203,6 +1296,7 @@
                     if (streetFilter === 'poor') {
                         document.getElementById('treeScenarioPanel').style.display = 'block';
                     }
+                    document.getElementById('zoomBanner').classList.add('hidden');
                     renderStreets();
                 }
             }
